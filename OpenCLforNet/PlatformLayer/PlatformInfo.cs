@@ -49,11 +49,14 @@ namespace OpenCLforNet.PlatformLayer
             }
             
             // get devices
-            OpenCL.clGetDeviceIDs(platform, (long)cl_device_type.CL_DEVICE_TYPE_ALL, 0, null, &count).CheckError();
+            var s = OpenCL.clGetDeviceIDs(platform, (long)cl_device_type.CL_DEVICE_TYPE_ALL, 0, null, &count);
 
-            // create device infos
-            for (int i = 0; i < count; i++)
-                DeviceInfos.Add(new DeviceInfo(platform, i));
+            if (s == 0)
+            {
+                // create device infos
+                for (int i = 0; i < count; i++)
+                    DeviceInfos.Add(new DeviceInfo(platform, i));
+            }
         }
 
         public List<string> Keys { get => infos.Keys.ToList(); }

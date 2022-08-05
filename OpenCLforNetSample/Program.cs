@@ -12,7 +12,8 @@ namespace OpenCLforNetTest
     {
         static void Main(string[] args)
         {
-            
+            Platform.Init();
+
             foreach (var platformInfo in Platform.PlatformInfos)
             {
                 foreach (var key in platformInfo.Keys)

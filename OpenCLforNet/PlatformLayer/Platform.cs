@@ -11,10 +11,11 @@ namespace OpenCLforNet.PlatformLayer
     public unsafe class Platform
     {
 
-        public static List<PlatformInfo> PlatformInfos { get; } = new List<PlatformInfo>();
+        public static List<PlatformInfo> PlatformInfos ;
 
-        static Platform()
+        public static void Init()
         {
+            PlatformInfos = new List<PlatformInfo>();
             // get platforms
             uint count = 0;
             OpenCL.clGetPlatformIDs(0, null, &count).CheckError();

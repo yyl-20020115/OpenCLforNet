@@ -194,7 +194,7 @@ namespace OpenCLforNet.Function
         CL_PROGRAM_BUILD_GLOBAL_VARIABLE_TOTAL_SIZE = 0x1185
     }
 
-    public enum cl_profiling_info
+    public enum cl_profiling_info : int
     {
         CL_PROFILING_COMMAND_QUEUED = 0x1280,
         CL_PROFILING_COMMAND_SUBMIT = 0x1281,
@@ -203,7 +203,7 @@ namespace OpenCLforNet.Function
         CL_PROFILING_COMMAND_COMPLETE = 0x1284
     }
 
-    public enum cl_status_code
+    public enum cl_status_code :int
     {
         CL_SUCCESS = 0,
         CL_DEVICE_NOT_FOUND = -1,

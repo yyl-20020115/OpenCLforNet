@@ -32,12 +32,15 @@ namespace OpenCLforNet.PlatformLayer
                 {
                     var a = Enum.GetName(typeof(cl_device_info), info);
                     var size = new IntPtr();
-                    OpenCL.clGetDeviceInfo(devices[index], info, IntPtr.Zero, null, &size).CheckError();
-                    byte[] value = new byte[(int)size];
-                    fixed (byte* valuePointer = value)
+                    var s = OpenCL.clGetDeviceInfo(devices[index], info, IntPtr.Zero, null, &size);//.CheckError();
+                    if(s == (int)cl_status_code.CL_SUCCESS)
                     {
-                        OpenCL.clGetDeviceInfo(devices[index], info, size, valuePointer, null).CheckError();
-                        infos.Add(Enum.GetName(typeof(cl_device_info), info), value);
+                        var value = new byte[(int)size];
+                        fixed (byte* valuePointer = value)
+                        {
+                            OpenCL.clGetDeviceInfo(devices[index], info, size, valuePointer, null).CheckError();
+                            infos.Add(Enum.GetName(typeof(cl_device_info), info), value);
+                        }
                     }
                 }
             }
