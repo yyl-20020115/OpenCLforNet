@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OpenCLforNet
+namespace OpenCLforNet;
+public static class Utils
 {
-    class Utils
-    {
-
-        public static bool Is32Bit()
-        {
-            return IntPtr.Size == 4;
-        }
-
-    }
+    public static bool Is32Bit => IntPtr.Size == sizeof(int);
+    public static bool Is64Bit => IntPtr.Size == sizeof(long);
 }

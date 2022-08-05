@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenCLforNet.PlatformLayer;
-using OpenCLforNet.Runtime;
 
 namespace OpenCLforNetTest
 {
-    unsafe class Program
+    public unsafe class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Platform.Init();
-
             foreach (var platformInfo in Platform.PlatformInfos)
             {
                 foreach (var key in platformInfo.Keys)
@@ -40,7 +34,7 @@ namespace OpenCLforNetTest
             var kernel = program.CreateKernel("testKernel");
             kernel.SetWorkSize(4);
 
-            
+
             Console.WriteLine("\nCL_MEM_READ_WRITE");
             var data = new float[] { 3F, 4.5F, 0F, -4.4F };
             var dataSize = (long)(sizeof(float) * 4);
@@ -57,7 +51,7 @@ namespace OpenCLforNetTest
             ShowArray(data);
             simpleMemory.Release();
 
-            
+
             Console.WriteLine("\nCL_MEM_COPY_HOST_PTR");
             data = new float[] { 3F, 4.5F, 0F, -4.4F };
             dataSize = sizeof(float) * 4;
@@ -72,7 +66,7 @@ namespace OpenCLforNetTest
             ShowArray(data);
             simpleMemory.Release();
 
-            
+
             Console.WriteLine("\nCL_MEM_ALLOC_HOST_PTR");
             dataSize = sizeof(float) * 4;
             var mappingMemory = context.CreateMappingMemory(dataSize);
@@ -80,7 +74,7 @@ namespace OpenCLforNetTest
 
             var event31 = mappingMemory.Mapping(commandQueue, true, 0, dataSize, out var p);
             event31.Wait();
-            var pointer = (float*) p;
+            var pointer = (float*)p;
             pointer[0] = 3F;
             pointer[1] = 4.5F;
             pointer[2] = 0F;
@@ -96,7 +90,7 @@ namespace OpenCLforNetTest
             ShowArray(data);
             mappingMemory.Release();
 
-            
+
             Console.WriteLine("\nCL_MEM_USE_HOST_PTR");
             data = new float[] { 3F, 4.5F, 0F, -4.4F };
             dataSize = sizeof(float) * 4;
@@ -111,7 +105,7 @@ namespace OpenCLforNetTest
             ShowArray(data);
             mappingMemory.Release();
 
-            
+
             Console.WriteLine("\nSVM");
             dataSize = sizeof(float) * 4;
             var svmBuffer = context.CreateSVMBuffer(dataSize, 0);
@@ -140,7 +134,7 @@ namespace OpenCLforNetTest
             context.Release();
             Console.WriteLine("program end ...");
             Console.Read();
-            
+
         }
 
         private static void ShowArray(float[] array)
@@ -158,4 +152,5 @@ kernel void testKernel(global float* array, float rate){
 }
 ";
     }
+
 }

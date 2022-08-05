@@ -2,74 +2,77 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using OpenCLforNet.Function;
 
-namespace OpenCLforNet.PlatformLayer
+namespace OpenCLforNet.PlatformLayer;
+
+public unsafe class PlatformInfo
 {
-    public unsafe class PlatformInfo
+    public int Index { get; }
+    public readonly List<DeviceInfo> DeviceInfos  = new ();
+
+    private readonly Dictionary<string, byte[]> infos = new ();
+
+    protected internal PlatformInfo(int index)
     {
+        Index = index;
 
-        public int Index { get; }
-        public List<DeviceInfo> DeviceInfos { get; } = new List<DeviceInfo>();
-
-        private Dictionary<string, byte[]> infos = new Dictionary<string, byte[]>();
-
-        internal PlatformInfo(int index)
+        // get a platform
+        uint count = 0;
+        var s0 = OpenCL.clGetPlatformIDs(0, null, &count);
+        if (s0 == 0)
         {
-            Index = index;
-
-            // get a platform
-            uint count = 0;
-            OpenCL.clGetPlatformIDs(0, null, &count).CheckError();
-            var platforms = (void **)Marshal.AllocCoTaskMem((int)(count * IntPtr.Size));
-            void* platform;
+            var platforms = (void**)Marshal.AllocCoTaskMem((int)(count * IntPtr.Size));
+            void* platform = null;
             try
             {
-                OpenCL.clGetPlatformIDs(count, platforms, &count).CheckError();
-                platform = platforms[index];
+
+                var s1 = OpenCL.clGetPlatformIDs(count, platforms, &count);
+                if (s1 != 0)
+                {
+                    platform = platforms[index];
+                    // get platform infos
+                    foreach (long info in Enum.GetValues(typeof(cl_platform_info)))
+                    {
+                        var size = new IntPtr();
+                        var s2 = OpenCL.clGetPlatformInfo(platform, info, IntPtr.Zero, null, &size);
+                        if (s2 == 0)
+                        {
+                            var value = new byte[(int)size];
+                            fixed (byte* valuePointer = value)
+                            {
+                                var s3 = OpenCL.clGetPlatformInfo(platform, info, size, valuePointer, null);
+                                if (s3 == 0)
+                                {
+                                    infos.Add(Enum.GetName(typeof(cl_platform_info), info), value);
+                                }
+                            }
+                        }
+                    }
+
+                    // get devices
+                    var s4 = OpenCL.clGetDeviceIDs(platform, (long)cl_device_type.CL_DEVICE_TYPE_ALL, 0, null, &count);
+
+                    if (s4 == 0)
+                    {
+                        // create device infos
+                        for (int i = 0; i < count; i++)
+                            DeviceInfos.Add(new DeviceInfo(platform, i));
+                    }
+                }
             }
             finally
             {
                 Marshal.FreeCoTaskMem(new IntPtr(platforms));
             }
-
-            // get platform infos
-            foreach (long info in Enum.GetValues(typeof(cl_platform_info)))
-            {
-                var size = new IntPtr();
-                OpenCL.clGetPlatformInfo(platform, info, IntPtr.Zero, null, &size).CheckError();
-                byte[] value = new byte[(int)size];
-                fixed (byte* valuePointer = value)
-                {
-                    OpenCL.clGetPlatformInfo(platform, info, size, valuePointer, null).CheckError();
-                    infos.Add(Enum.GetName(typeof(cl_platform_info), info), value);
-                }
-            }
-            
-            // get devices
-            var s = OpenCL.clGetDeviceIDs(platform, (long)cl_device_type.CL_DEVICE_TYPE_ALL, 0, null, &count);
-
-            if (s == 0)
-            {
-                // create device infos
-                for (int i = 0; i < count; i++)
-                    DeviceInfos.Add(new DeviceInfo(platform, i));
-            }
         }
-
-        public List<string> Keys { get => infos.Keys.ToList(); }
-
-        public string this[string key]
-        {
-            get => Encoding.UTF8.GetString(infos[key], 0, infos[key].Length).Trim();
-        }
-
-        public string GetValueAsString(string key)
-        {
-            return Encoding.UTF8.GetString(infos[key], 0, infos[key].Length).Trim();
-        }
-
     }
+
+    public List<string> Keys => infos.Keys.ToList();
+
+    public string this[string key] => Encoding.UTF8.GetString(infos[key], 0, infos[key].Length).Trim();
+
+    public string GetValueAsString(string key) => Encoding.UTF8.GetString(infos[key], 0, infos[key].Length).Trim();
+
 }
